@@ -6,7 +6,7 @@ const UpdateEvent = () => {
   const { sessionClaims } = auth();
   console.log(sessionClaims);
 
-  const userId = sessionClaims?.userId as String;
+  const userId = sessionClaims?.userId as string;
   console.log(userId);
 
   return (
