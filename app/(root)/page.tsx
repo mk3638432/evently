@@ -1,4 +1,6 @@
 import { Button } from "@/components/ui/button";
+import Collection from "@/components/ui/shared/Collection";
+import { getAllEvents } from "@/lib/actions/event.action";
 import { SearchParamProps } from "@/types";
 
 import Image from "next/image";
@@ -9,12 +11,13 @@ export default async function Home({ searchParams }: SearchParamProps) {
   const searchText = (searchParams?.query as string) || "";
   const category = (searchParams?.category as string) || "";
 
-  // const events = await getAllEvents({
-  //   query: searchText,
-  //   category,
-  //   page,
-  //   limit: 6
-  // })
+  const events = await getAllEvents({
+    query: searchText,
+    category,
+    page,
+    limit: 6,
+  });
+  console.log(events);
 
   return (
     <>
@@ -56,7 +59,7 @@ export default async function Home({ searchParams }: SearchParamProps) {
           <CategoryFilter />
         </div> */}
 
-        {/* <Collection 
+        <Collection
           data={events?.data}
           emptyTitle="No Events Found"
           emptyStateSubtext="Come back later"
@@ -64,7 +67,7 @@ export default async function Home({ searchParams }: SearchParamProps) {
           limit={6}
           page={page}
           totalPages={events?.totalPages}
-        /> */}
+        />
       </section>
     </>
   );

@@ -6,7 +6,7 @@ const page = () => {
   const { sessionClaims } = auth();
   console.log(sessionClaims);
 
-  const userId = sessionClaims?.userId?.userId as String;
+  const userId = sessionClaims?.userId as string;
   console.log(userId);
 
   return (

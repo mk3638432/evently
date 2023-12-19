@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -12,12 +13,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "../button";
 import { eventFormSchema } from "@/lib/validator";
-import { z } from "zod";
+import * as z from "zod";
 import { eventDefaultValues } from "@/constants";
 import Dropdown from "./Dropdown";
-import { Textarea } from "../textarea";
+import { Textarea } from "@/components/ui/textarea";
 import { FileUploader } from "./FileUploader";
 import { useState } from "react";
 import Image from "next/image";
@@ -25,28 +25,37 @@ import DatePicker from "react-datepicker";
 import { useUploadThing } from "@/lib/uploadthing";
 
 import "react-datepicker/dist/react-datepicker.css";
-import { Checkbox } from "../checkbox";
 import { useRouter } from "next/navigation";
-import { createEvent, updateEvent } from "@/lib/actions/event.action";
 import { IEvent } from "@/lib/database/models/event.model";
+import { createEvent, updateEvent } from "@/lib/actions/event.action";
+import { Checkbox } from "../checkbox";
 
-type EventformProps = {
+type EventFormProps = {
   userId: string;
   type: "Create" | "Update";
   event?: IEvent;
   eventId?: string;
 };
-const EventForm = ({ userId, type, event, eventId }: EventformProps) => {
-  const router = useRouter();
+
+const EventForm = ({ userId, type, event, eventId }: EventFormProps) => {
   const [files, setFiles] = useState<File[]>([]);
+  const initialValues =
+    event && type === "Update"
+      ? {
+          ...event,
+          startDateTime: new Date(event.startDateTime),
+          endDateTime: new Date(event.endDateTime),
+        }
+      : eventDefaultValues;
+  const router = useRouter();
+
   const { startUpload } = useUploadThing("imageUploader");
-  const intialValues = eventDefaultValues;
+
   const form = useForm<z.infer<typeof eventFormSchema>>({
     resolver: zodResolver(eventFormSchema),
-    defaultValues: intialValues,
+    defaultValues: initialValues,
   });
 
-  // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof eventFormSchema>) {
     console.log(values);
     let uploadedImageUrl = values.imageUrl;
@@ -60,6 +69,7 @@ const EventForm = ({ userId, type, event, eventId }: EventformProps) => {
 
       uploadedImageUrl = uploadedImages[0].url;
     }
+
     if (type === "Create") {
       try {
         const newEvent = await createEvent({
@@ -82,6 +92,7 @@ const EventForm = ({ userId, type, event, eventId }: EventformProps) => {
         router.back();
         return;
       }
+
       try {
         const updatedEvent = await updateEvent({
           userId,
@@ -103,22 +114,21 @@ const EventForm = ({ userId, type, event, eventId }: EventformProps) => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col gap-5  "
+        className="flex flex-col gap-5"
       >
-        <div className="flex flex-col gap-5 md:flex-row   ">
+        <div className="flex flex-col gap-5 md:flex-row">
           <FormField
             control={form.control}
             name="title"
             render={({ field }) => (
-              <FormItem className="w-full  ">
+              <FormItem className="w-full">
                 <FormControl>
                   <Input
-                    placeholder="Event Title"
+                    placeholder="Event title"
                     {...field}
                     className="input-field"
                   />
                 </FormControl>
-
                 <FormMessage />
               </FormItem>
             )}
@@ -127,26 +137,25 @@ const EventForm = ({ userId, type, event, eventId }: EventformProps) => {
             control={form.control}
             name="categoryId"
             render={({ field }) => (
-              <FormItem className="w-full  ">
+              <FormItem className="w-full">
                 <FormControl>
                   <Dropdown
                     onChangeHandler={field.onChange}
                     value={field.value}
                   />
                 </FormControl>
-
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
 
-        <div className="flex flex-col gap-5 md:flex-row  ">
+        <div className="flex flex-col gap-5 md:flex-row">
           <FormField
             control={form.control}
             name="description"
             render={({ field }) => (
-              <FormItem className="w-full  ">
+              <FormItem className="w-full">
                 <FormControl className="h-72">
                   <Textarea
                     placeholder="Description"
@@ -154,7 +163,6 @@ const EventForm = ({ userId, type, event, eventId }: EventformProps) => {
                     className="textarea rounded-2xl"
                   />
                 </FormControl>
-
                 <FormMessage />
               </FormItem>
             )}
@@ -163,7 +171,7 @@ const EventForm = ({ userId, type, event, eventId }: EventformProps) => {
             control={form.control}
             name="imageUrl"
             render={({ field }) => (
-              <FormItem className="w-full  ">
+              <FormItem className="w-full">
                 <FormControl className="h-72">
                   <FileUploader
                     onFieldChange={field.onChange}
@@ -171,12 +179,12 @@ const EventForm = ({ userId, type, event, eventId }: EventformProps) => {
                     setFiles={setFiles}
                   />
                 </FormControl>
-
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
+
         <div className="flex flex-col gap-5 md:flex-row">
           <FormField
             control={form.control}
@@ -270,6 +278,7 @@ const EventForm = ({ userId, type, event, eventId }: EventformProps) => {
             )}
           />
         </div>
+
         <div className="flex flex-col gap-5 md:flex-row">
           <FormField
             control={form.control}

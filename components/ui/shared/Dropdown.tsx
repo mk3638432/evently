@@ -1,6 +1,3 @@
-"use client";
-import React, { startTransition, useEffect, useState } from "react";
-
 import {
   Select,
   SelectContent,
@@ -9,6 +6,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ICategory } from "@/lib/database/models/category.model";
+import { startTransition, useEffect, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,55 +18,59 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Input } from "../input";
 import {
   createCategory,
   getAllCategories,
 } from "@/lib/actions/category.actions";
+import { Input } from "../input";
 
 type DropdownProps = {
   value?: string;
   onChangeHandler?: () => void;
 };
 
-const Dropdown = ({ onChangeHandler, value }: DropdownProps) => {
-  const [category, setCategory] = useState<ICategory[]>([]);
+const Dropdown = ({ value, onChangeHandler }: DropdownProps) => {
+  const [categories, setCategories] = useState<ICategory[]>([]);
   const [newCategory, setNewCategory] = useState("");
 
   const handleAddCategory = () => {
     createCategory({
       categoryName: newCategory.trim(),
     }).then((category) => {
-      setCategory((prestate) => [...prestate, category]);
+      setCategories((prevState) => [...prevState, category]);
     });
   };
 
   useEffect(() => {
     const getCategories = async () => {
-      const categories = await getAllCategories();
-      categories && setCategory(categories as ICategory[]);
+      const categoryList = await getAllCategories();
+
+      categoryList && setCategories(categoryList as ICategory[]);
     };
+
     getCategories();
   }, []);
+
   return (
     <Select onValueChange={onChangeHandler} defaultValue={value}>
       <SelectTrigger className="select-field">
         <SelectValue placeholder="Category" />
       </SelectTrigger>
       <SelectContent>
-        {category.length > 0 &&
-          category.map((category) => (
+        {categories.length > 0 &&
+          categories.map((category) => (
             <SelectItem
-              value={category?.name}
-              className="select-item p-regular-14 "
-              key={category?._id}
+              key={category._id}
+              value={category._id}
+              className="select-item p-regular-14"
             >
               {category.name}
             </SelectItem>
           ))}
+
         <AlertDialog>
-          <AlertDialogTrigger className="p-medium-14 flex w-full rounded-sm py-3 pl-8 text-primary-500">
-            Add New Catagories
+          <AlertDialogTrigger className="p-medium-14 flex w-full rounded-sm py-3 pl-8 text-primary-500 hover:bg-primary-50 focus:text-primary-500">
+            Add new category
           </AlertDialogTrigger>
           <AlertDialogContent className="bg-white">
             <AlertDialogHeader>
@@ -76,7 +78,7 @@ const Dropdown = ({ onChangeHandler, value }: DropdownProps) => {
               <AlertDialogDescription>
                 <Input
                   type="text"
-                  placeholder="Category Name"
+                  placeholder="Category name"
                   className="input-field mt-3"
                   onChange={(e) => setNewCategory(e.target.value)}
                 />
